@@ -193,7 +193,7 @@
 <p>两个事务都是持有记录锁并且等待记录锁，来看下数据表结构</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE `tide_boxes_cards_level` (</span><br><span class="line">`id` int unsigned NOT NULL AUTO_INCREMENT,</span><br><span class="line">`cards_id` int unsigned NOT NULL DEFAULT &#x27;0&#x27; COMMENT &#x27;卡类id&#x27;,</span><br><span class="line">`level` tinyint unsigned NOT NULL DEFAULT &#x27;0&#x27;,</span><br><span class="line">`created_at` datetime DEFAULT NULL,</span><br><span class="line">`updated_at` datetime DEFAULT NULL,</span><br><span class="line">`num` int unsigned NOT NULL DEFAULT &#x27;0&#x27;</span><br><span class="line">UNIQUE KEY `cards_id` (`cards_id`,`level`) USING BTREE</span><br><span class="line">) ENGINE=InnoDB </span><br></pre></td></tr></table></figure>
 <p>唯一索引，从索引记录来看是数据库中有符合的记录才会持有记录锁。</p>
-<p>跟开发同学沟通以后，业务需求大概是<br>一个盲盒礼包，内部含有多个类别的商品，用户一次购买一个礼包，礼包的商品是随机从商品类别里面插入进去的。<br>结算时候需要扣件相应的类别的库存。开啊的逻辑是在一个事务里面循环扣减。</p>
+<p>跟开发同学沟通以后，业务需求大概是<br>一个盲盒礼包，内部含有多个类别的商品，用户一次购买一个礼包，礼包的商品是随机从商品类别里面插入进去的。<br>结算时候需要扣减相应的类别的库存。结算逻辑是在一个事务里面进行循环。</p>
 <table>
 <thead>
 <tr>
@@ -221,7 +221,7 @@
 <h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><p>每次运算逻辑之前 先把盲盒礼包内的商品按cards_id,level排好序，在来进行loop逻辑。</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_ invoke__">usort</span>(<span class="variable">$prizeArr</span>, function(<span class="variable">$a</span>, <span class="variable">$b</span>) &#123; <span class="comment">// 卡id升序， 卡类一样， 等级升序</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="variable">$a</span>[<span class="string">&#x27;cardsId&#x27;</span>] == <span class="variable">$b</span>[<span class="string">&#x27;cardsId&#x27;</span>]) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="variable">$a</span>[<span class="string">&#x27;level&#x27;</span>] - <span class="variable">$b</span>[<span class="string">&#x27;level&#x27;</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="variable">$a</span>[<span class="string">&#x27;cardsId&#x27;</span>] - <span class="variable">$b</span>[<span class="string">&#x27;cardsId&#x27;</span>];</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 <p>问题解决!</p>
-<h1 id="其它方案"><a href="#其它方案" class="headerlink" title="其它方案"></a>其它方案</h1><p>建立一个冗余 unique_key 字段:cards_id+level ,每次执行更新库存钱，where in 锁住所有的记录，然后在执行更新</p>
+<h1 id="其它方案"><a href="#其它方案" class="headerlink" title="其它方案"></a>其它方案</h1><p>建立一个冗余 unique_key 字段:cards_id+level ,每次执行结算先 where in 锁住所有的记录，然后在执行更新。</p>
 </section>
     <!-- Tags START -->
     
