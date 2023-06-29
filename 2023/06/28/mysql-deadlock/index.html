@@ -20,10 +20,18 @@
 <link rel="stylesheet" href="/css/style.css">
 
   
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
   
+  
+    
+<script src="/js/gitment.js"></script>
+
   
   
   
@@ -262,15 +270,9 @@
     
     <!-- 二维码 END -->
     
-      <!-- Utterances START -->
-      <div id="utterances"></div>
-      <script src="https://utteranc.es/client.js"
-        repo=""
-        issue-term="pathname"
-        theme="github-light"
-        crossorigin="anonymous"
-        async></script>    
-      <!-- Utterances END -->
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
     
   </article>
   <!-- Article END -->
@@ -340,6 +342,34 @@
 
 
 
+
+  <script>
+    var gitmentConfig = "donyhuang";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "mysql 死锁分析",
+        owner: "donyhuang",
+        repo: "donyhuang.github.io",
+        oauth: {
+          client_id: "7766884448598d4cb4da",
+          client_secret: "d02e22f21ae210c7af3804b68f93cc7fd49de82e"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
 
 
 
