@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="donyhuang&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      golang udp服务优雅关停 | Hexo
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+  
+    
+<script src="/js/local-search.js"></script>
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>Hexo</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+      
+        <li class="menu-item menu-item-search right-list">
+    <a role="button" class="popup-trigger">
+        <i class="fa fa-search fa-fw"></i>
+    </a>
+</li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">首页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+    
+      <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+            <span class="search-icon">
+                <i class="fa fa-search"></i>
+            </span>
+            <div class="search-input-container">
+                <input autocomplete="off" autocapitalize="off"
+                    placeholder="Please enter your keyword(s) to search." spellcheck="false"
+                    type="search" class="search-input">
+            </div>
+            <span class="popup-btn-close">
+                <i class="fa fa-times-circle"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+    
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>golang udp服务优雅关停</h2>
+  <p class="post-date">2023-07-12</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>开发一个用户行为数据上报程序。决定采用udp server,数据协议使用protobuf。</p>
+<h1 id="udp协议"><a href="#udp协议" class="headerlink" title="udp协议"></a>udp协议</h1><p>udp协议是基于数据报，没有链接的，如果udp协议的接收buf满了话（服务端处理速度&lt;客户端发送速度），数据会直接丢弃。</p>
+<h2 id="优雅关闭要保证程序在以下执行之后停止"><a href="#优雅关闭要保证程序在以下执行之后停止" class="headerlink" title="优雅关闭要保证程序在以下执行之后停止"></a>优雅关闭要保证程序在以下执行之后停止</h2><ul>
+<li>所有正在执行的协程任务</li>
+<li>所有buf chan 消费完成</li>
+</ul>
+<h2 id="在容器中pod关闭会对我们的程序发送SIGTERM信号-，我们首先需要捕捉到关闭信号。"><a href="#在容器中pod关闭会对我们的程序发送SIGTERM信号-，我们首先需要捕捉到关闭信号。" class="headerlink" title="在容器中pod关闭会对我们的程序发送SIGTERM信号 ，我们首先需要捕捉到关闭信号。"></a>在容器中pod关闭会对我们的程序发送SIGTERM信号 ，我们首先需要捕捉到关闭信号。</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// closeChan 准备关闭的Chan</span></span><br><span class="line">closeChan := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">sigChan := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">1</span>)</span><br><span class="line">signal.Notify(sigChan, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGINT)</span><br><span class="line"><span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    &lt;-sigChan <span class="comment">//等待信号</span></span><br><span class="line">    <span class="built_in">close</span>(closeChan) <span class="comment">// close chan可以用于多次读取。</span></span><br><span class="line">&#125;()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="在收到信号之后，我们要读取完全部的udp-buf的数据，可以设定一个超时时间。"><a href="#在收到信号之后，我们要读取完全部的udp-buf的数据，可以设定一个超时时间。" class="headerlink" title="在收到信号之后，我们要读取完全部的udp buf的数据，可以设定一个超时时间。"></a>在收到信号之后，我们要读取完全部的udp buf的数据，可以设定一个超时时间。</h2><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">out:</span><br><span class="line"><span class="keyword">for</span>&#123;</span><br><span class="line">    err:=handleConn(uConn)</span><br><span class="line">    <span class="keyword">select</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> &lt;-closeChan: <span class="comment">//接收到信号之后</span></span><br><span class="line">            <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">                <span class="keyword">break</span> out</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> drainTimeOutTime == <span class="literal">nil</span> &#123; <span class="comment">//排空udp buf的所有数据的超时时间</span></span><br><span class="line">                tNow := time.Now().Add(drainTimeout)</span><br><span class="line">                drainTimeOutTime = &amp;tNow</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> drainTimeOutTime.After(time.Now()) &#123;</span><br><span class="line">                    logx.Errorf(<span class="string">&quot;drain time out will cause all buff data lost&quot;</span>)</span><br><span class="line">                    <span class="keyword">break</span> out</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">&#125;		</span><br><span class="line">task.Close() <span class="comment">//执行的任务的优雅关闭</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="udp-task优雅关闭-使用wait-group"><a href="#udp-task优雅关闭-使用wait-group" class="headerlink" title="udp task优雅关闭 使用wait group"></a>udp task优雅关闭 使用wait group</h2><ol>
+<li>关闭taskBuf</li>
+<li>所有的任务都起一个协程并且加入到waitGroup里面</li>
+<li>等待协程任务执行完成</li>
+</ol>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Task <span class="keyword">struct</span>&#123;</span><br><span class="line">    wg sync.WaitGroup</span><br><span class="line">    closeChan <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">    buf <span class="keyword">chan</span> Buf</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Task)</span></span>Work()&#123;</span><br><span class="line">    <span class="keyword">for</span> b:=<span class="keyword">range</span> t.buf&#123;</span><br><span class="line">        <span class="keyword">go</span> t.handle(b)<span class="comment">//每个任务执行都开启一个协程</span></span><br><span class="line">    &#125;</span><br><span class="line">    t.closeChan&lt;-<span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Task)</span></span> handle(b Buf)&#123; </span><br><span class="line">    t.wg.Add(<span class="number">1</span>)</span><br><span class="line">    .......</span><br><span class="line">    t.wg.Done()</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span><span class="params">(t *Task)</span></span>Close()&#123;</span><br><span class="line">    <span class="built_in">close</span>(t.buf) <span class="comment">//关闭buf</span></span><br><span class="line">    &lt;-t.closeChan <span class="comment">//等待所有的buf 开始处理</span></span><br><span class="line">    t.wg.Wait() <span class="comment">//等待所有的buf数据处理完成（协程处理完成）。</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#golang" >
+    <span class="tag-code">golang</span>
+  </a>
+
+  <a href="/tags#udp" >
+    <span class="tag-code">udp</span>
+  </a>
+
+  <a href="/tags#graceful" >
+    <span class="tag-code">graceful</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2023/06/29/%E5%9F%BA%E4%BA%8Ek8s%E7%8E%AF%E5%A2%83grpc%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%E5%A7%BF%E5%8A%BF/">
+        <span class="nav-arrow">← </span>
+        
+          基于k8s环境grpc正确使用姿势
+        
+      </a>
+    
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">Catalog</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-nav-text">背景</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#udp%E5%8D%8F%E8%AE%AE"><span class="toc-nav-text">udp协议</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%BC%98%E9%9B%85%E5%85%B3%E9%97%AD%E8%A6%81%E4%BF%9D%E8%AF%81%E7%A8%8B%E5%BA%8F%E5%9C%A8%E4%BB%A5%E4%B8%8B%E6%89%A7%E8%A1%8C%E4%B9%8B%E5%90%8E%E5%81%9C%E6%AD%A2"><span class="toc-nav-text">优雅关闭要保证程序在以下执行之后停止</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%9C%A8%E5%AE%B9%E5%99%A8%E4%B8%ADpod%E5%85%B3%E9%97%AD%E4%BC%9A%E5%AF%B9%E6%88%91%E4%BB%AC%E7%9A%84%E7%A8%8B%E5%BA%8F%E5%8F%91%E9%80%81SIGTERM%E4%BF%A1%E5%8F%B7-%EF%BC%8C%E6%88%91%E4%BB%AC%E9%A6%96%E5%85%88%E9%9C%80%E8%A6%81%E6%8D%95%E6%8D%89%E5%88%B0%E5%85%B3%E9%97%AD%E4%BF%A1%E5%8F%B7%E3%80%82"><span class="toc-nav-text">在容器中pod关闭会对我们的程序发送SIGTERM信号 ，我们首先需要捕捉到关闭信号。</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%9C%A8%E6%94%B6%E5%88%B0%E4%BF%A1%E5%8F%B7%E4%B9%8B%E5%90%8E%EF%BC%8C%E6%88%91%E4%BB%AC%E8%A6%81%E8%AF%BB%E5%8F%96%E5%AE%8C%E5%85%A8%E9%83%A8%E7%9A%84udp-buf%E7%9A%84%E6%95%B0%E6%8D%AE%EF%BC%8C%E5%8F%AF%E4%BB%A5%E8%AE%BE%E5%AE%9A%E4%B8%80%E4%B8%AA%E8%B6%85%E6%97%B6%E6%97%B6%E9%97%B4%E3%80%82"><span class="toc-nav-text">在收到信号之后，我们要读取完全部的udp buf的数据，可以设定一个超时时间。</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#udp-task%E4%BC%98%E9%9B%85%E5%85%B3%E9%97%AD-%E4%BD%BF%E7%94%A8wait-group"><span class="toc-nav-text">udp task优雅关闭 使用wait group</span></a></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'https://donyhuang.github.io/2023/07/12/golang-udp服务优雅关停/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', '/css/images/error_icon.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== '/css/images/error_icon.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+
+
+  <script>
+    var gitmentConfig = "donyhuang";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "golang udp服务优雅关停",
+        owner: "donyhuang",
+        repo: "donyhuang.github.io",
+        oauth: {
+          client_id: "7766884448598d4cb4da",
+          client_secret: "d02e22f21ae210c7af3804b68f93cc7fd49de82e"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2023 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+    Theme by <a target="_blank" rel="noopener" href="https://github.com/yanm1ng">yanm1ng</a>
+    
+    
+            <!-- 不蒜子统计 -->
+            <span id="busuanzi_container_site_pv">
+                    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+            </span>
+            <span class="post-meta-divider">|</span>
+            <span id="busuanzi_container_site_uv" style='display:none'>
+                    本站访客数<span id="busuanzi_value_site_uv"></span>人
+            </span>
+            <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+      
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      hljs.configure({useBR: true});
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+
+  </body>
+</html>

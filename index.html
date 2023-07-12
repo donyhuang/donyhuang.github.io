@@ -187,6 +187,37 @@
   
     <article class="article-card">
       <h2 class="article-head">
+        <a href="/2023/07/12/golang-udp%E6%9C%8D%E5%8A%A1%E4%BC%98%E9%9B%85%E5%85%B3%E5%81%9C/">golang udp服务优雅关停</a>
+      </h2>
+      <p class="article-date">July 12, 2023</p>
+      
+        
+  <a href="/tags#golang" >
+    <span class="tag-code">golang</span>
+  </a>
+
+  <a href="/tags#udp" >
+    <span class="tag-code">udp</span>
+  </a>
+
+  <a href="/tags#graceful" >
+    <span class="tag-code">graceful</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          背景开发一个用户行为数据上报程序。决定采用udp server,数据协议使用protobuf。
+udp协议udp协议是基于数据报，没有链接的，如果udp协议的接收buf满了话（服务端处理速度&lt;客户端发送速度），数据会直接丢弃。
+优雅关闭要保证程序在以下执行之后停止
+所有正在执行的协程任 ...
+        
+      </div>
+      <a class="more" href="/2023/07/12/golang-udp%E6%9C%8D%E5%8A%A1%E4%BC%98%E9%9B%85%E5%85%B3%E5%81%9C/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
         <a href="/2023/06/29/%E5%9F%BA%E4%BA%8Ek8s%E7%8E%AF%E5%A2%83grpc%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%E5%A7%BF%E5%8A%BF/">基于k8s环境grpc正确使用姿势</a>
       </h2>
       <p class="article-date">June 29, 2023</p>
